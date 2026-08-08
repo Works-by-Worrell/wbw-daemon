@@ -69,3 +69,14 @@ fi
 
 echo "wbw-daemon installed successfully."
 echo "Note: Ensure $LOCAL_BIN_DIR is in your system PATH."
+
+echo ""
+echo "============================================================"
+echo "    REQUIRED ACTION: RELOAD YOUR TERMINAL ENVIRONMENT       "
+echo "============================================================"
+echo " You MUST execute the following command before continuing:"
+echo ""
+echo "                   source ~/.bashrc                       "
+echo ""
+echo "============================================================"
+echo ""
