@@ -33,12 +33,14 @@ if [ -z "$WARLOCK_API_URL" ]; then
     exit 1
 fi
 
-echo "Fetching operator identity for $AGY_OPERATOR_ID from Warlock ($WARLOCK_API_URL)..."
-if curl -s -f -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-     "$WARLOCK_API_URL/profile/$AGY_OPERATOR_ID/combined" > "$IDENTITY_FILE"; then
-    echo "Local identity successfully loaded."
+# Extract the identity ruleset via Warlock's new REST fallback endpoint
+echo "Fetching daemon identity payload from Warlock ($WARLOCK_API_URL)..."
+if curl -s -f -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+     "$WARLOCK_API_URL/api/daemon" > "$IDENTITY_FILE"; then
+    echo "Identity successfully loaded."
 else
     echo "WARNING: Failed to fetch local identity. The system will fall back to base.md." >&2
+    # Ensure any partial bad fetch is cleared out so Antigravity doesn't read corrupted JSON/HTML
     rm -f "$IDENTITY_FILE"
 fi
 
