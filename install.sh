@@ -12,9 +12,15 @@ fi
 # Derive AGY_WORKSPACE_ROOT dynamically
 AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 
+# Set Warlock connection defaults (can be overridden in the environment before running install.sh)
+WBW_WARLOCK_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
+WBW_WARLOCK_REGION="${WBW_WARLOCK_REGION:-us-central1}"
+
 # Export for sub-processes if necessary
 export AGY_WORKSPACE_ROOT
 export AGY_OPERATOR_ID
+export WBW_WARLOCK_SERVICE
+export WBW_WARLOCK_REGION
 
 PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
 
@@ -58,12 +64,16 @@ if [ -f "$BASHRC" ]; then
     # Remove existing exports to prevent duplicates
     sed -i '/export AGY_WORKSPACE_ROOT=/d' "$BASHRC"
     sed -i '/export AGY_OPERATOR_ID=/d' "$BASHRC"
+    sed -i '/export WBW_WARLOCK_SERVICE=/d' "$BASHRC"
+    sed -i '/export WBW_WARLOCK_REGION=/d' "$BASHRC"
     sed -i '/alias wbw-daemon=/d' "$BASHRC"
     
     echo "" >> "$BASHRC"
     echo "# Works-by-Worrell Config" >> "$BASHRC"
     echo "export AGY_OPERATOR_ID=\"$AGY_OPERATOR_ID\"" >> "$BASHRC"
     echo "export AGY_WORKSPACE_ROOT=\"$AGY_WORKSPACE_ROOT\"" >> "$BASHRC"
+    echo "export WBW_WARLOCK_SERVICE=\"$WBW_WARLOCK_SERVICE\"" >> "$BASHRC"
+    echo "export WBW_WARLOCK_REGION=\"$WBW_WARLOCK_REGION\"" >> "$BASHRC"
     echo "Successfully updated ~/.bashrc"
 fi
 

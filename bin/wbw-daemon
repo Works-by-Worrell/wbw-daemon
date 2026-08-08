@@ -24,7 +24,9 @@ mkdir -p "$(dirname "$IDENTITY_FILE")"
 
 # Dynamically resolve the Cloud Run URL to avoid proxy dependency during bootstrap
 echo "Resolving direct Warlock Cloud Run URL..."
-WARLOCK_API_URL=$(gcloud run services describe warlock-mcp-nprd --region=us-central1 --format='value(status.url)' 2>/dev/null)
+WARLOCK_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
+WARLOCK_REGION="${WBW_WARLOCK_REGION:-us-central1}"
+WARLOCK_API_URL=$(gcloud run services describe $WARLOCK_SERVICE --region=$WARLOCK_REGION --format='value(status.url)' 2>/dev/null)
 
 if [ -z "$WARLOCK_API_URL" ]; then
     echo "ERROR: Failed to resolve Warlock service URL." >&2
