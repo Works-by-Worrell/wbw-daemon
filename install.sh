@@ -51,5 +51,21 @@ chmod +x "$PLUGIN_TARGET/bin/wbw-daemon"
 # Create the symlink
 ln -sf "$PLUGIN_TARGET/bin/wbw-daemon" "$DAEMON_SYMLINK"
 
+# Update ~/.bashrc
+BASHRC="$HOME/.bashrc"
+if [ -f "$BASHRC" ]; then
+    echo "Configuring ~/.bashrc..."
+    # Remove existing exports to prevent duplicates
+    sed -i '/export AGY_WORKSPACE_ROOT=/d' "$BASHRC"
+    sed -i '/export AGY_OPERATOR_ID=/d' "$BASHRC"
+    sed -i '/alias wbw-daemon=/d' "$BASHRC"
+    
+    echo "" >> "$BASHRC"
+    echo "# Works-by-Worrell Config" >> "$BASHRC"
+    echo "export AGY_OPERATOR_ID=\"$AGY_OPERATOR_ID\"" >> "$BASHRC"
+    echo "export AGY_WORKSPACE_ROOT=\"$AGY_WORKSPACE_ROOT\"" >> "$BASHRC"
+    echo "Successfully updated ~/.bashrc"
+fi
+
 echo "wbw-daemon installed successfully."
 echo "Note: Ensure $LOCAL_BIN_DIR is in your system PATH."
