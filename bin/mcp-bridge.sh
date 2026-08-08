@@ -10,7 +10,7 @@ flock -n 9 || { echo "Another instance of mcp-bridge is already running." >&2; e
 echo "Starting Warlock proxy..." >&2
 
 # Start the gcloud proxy in the background on port 8080
-gcloud run services proxy warlock --port 8080 &
+gcloud run services proxy warlock-mcp-nprd --region=us-central1 --port 8080 &
 PROXY_PID=$!
 
 # Ensure the proxy is terminated when this script exits
