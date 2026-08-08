@@ -36,6 +36,7 @@ ln -s "$(pwd)" "$PLUGIN_TARGET"
 
 # Dynamically rewrite mcp_config.json with absolute path
 echo "Updating mcp_config.json with absolute path..."
+cp "$(pwd)/mcp_config.json.template" "$(pwd)/mcp_config.json"
 sed -i "s|\"[^\"]*bin/mcp-bridge.sh\"|\"$PLUGIN_TARGET/bin/mcp-bridge.sh\"|g" "$(pwd)/mcp_config.json"
 
 # Create an executable symlink in ~/.local/bin

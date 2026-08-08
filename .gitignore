@@ -7,3 +7,4 @@ node_modules/
 # WBW Daemon local dynamically generated files
 *.local.md
 rules/identity.local.md
+mcp_config.json
