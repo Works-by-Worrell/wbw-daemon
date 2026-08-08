@@ -17,7 +17,9 @@ if [ -z "$AGY_OPERATOR_ID" ]; then
 fi
 
 # 3. Retrieve payload from Warlock and write to rules/identity.local.md
-IDENTITY_FILE="$(dirname "$0")/../rules/identity.local.md"
+# Resolve real path in case this is executed via symlink in ~/.local/bin
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+IDENTITY_FILE="$SCRIPT_DIR/../rules/identity.local.md"
 
 # Ensure the rules directory exists
 mkdir -p "$(dirname "$IDENTITY_FILE")"
