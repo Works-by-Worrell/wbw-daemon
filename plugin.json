@@ -1,0 +1,7 @@
+{
+  "name": "wbw-daemon",
+  "version": "1.0.0",
+  "description": "Works-by-Worrell Daemon Plugin for AGY",
+  "author": "Works by Worrell",
+  "type": "plugin"
+}

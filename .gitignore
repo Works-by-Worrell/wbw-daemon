@@ -1,0 +1,9 @@
+# Standard ignores
+node_modules/
+.DS_Store
+*.log
+/tmp/
+
+# WBW Daemon local dynamically generated files
+*.local.md
+rules/identity.local.md
