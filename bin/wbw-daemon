@@ -22,16 +22,8 @@ IDENTITY_FILE="$(dirname "$0")/../rules/identity.local.md"
 # Ensure the rules directory exists
 mkdir -p "$(dirname "$IDENTITY_FILE")"
 
-# Dynamically resolve the Cloud Run URL to avoid proxy dependency during bootstrap
-echo "Resolving direct Warlock Cloud Run URL..."
-WARLOCK_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
-WARLOCK_REGION="${WBW_WARLOCK_REGION:-us-central1}"
-WARLOCK_API_URL=$(gcloud run services describe $WARLOCK_SERVICE --region=$WARLOCK_REGION --format='value(status.url)' 2>/dev/null)
-
-if [ -z "$WARLOCK_API_URL" ]; then
-    echo "ERROR: Failed to resolve Warlock service URL." >&2
-    exit 1
-fi
+# Hardcode to the Mayor's preferred custom domain
+WARLOCK_API_URL="https://warlock-nprd.worksbyworrell.com"
 
 # Extract the identity ruleset via Warlock's new REST fallback endpoint
 echo "Fetching daemon identity payload from Warlock ($WARLOCK_API_URL)..."
@@ -43,6 +35,20 @@ else
     # Ensure any partial bad fetch is cleared out so Antigravity doesn't read corrupted JSON/HTML
     rm -f "$IDENTITY_FILE"
 fi
+
+WARLOCK_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
+WARLOCK_REGION="${WBW_WARLOCK_REGION:-us-central1}"
+
+echo "Starting Warlock proxy on port 8080 for MCP SSE connection..."
+gcloud run services proxy $WARLOCK_SERVICE --region=$WARLOCK_REGION --port 8080 >/dev/null 2>&1 &
+PROXY_PID=$!
+trap 'kill $PROXY_PID 2>/dev/null' EXIT
+
+echo "Waiting for proxy to initialize..."
+while ! (echo > /dev/tcp/127.0.0.1/8080) >/dev/null 2>&1; do
+    sleep 0.5
+done
+echo "Proxy is ready at http://localhost:8080"
 
 # 4. Launch the agy CLI process
 echo "Launching AGY CLI..."

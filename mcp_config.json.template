@@ -1,9 +1,7 @@
 {
   "mcpServers": {
     "warlock": {
-      "command": "bash",
-      "args": ["/home/raworre/Source/WBW/.agents/plugins/wbw-daemon/bin/mcp-bridge.sh"],
-      "env": {}
+      "serverUrl": "http://localhost:8080/sse"
     }
   }
 }

@@ -75,8 +75,7 @@ ln -s "$(pwd)" "$PLUGIN_TARGET"
 echo -e "  ${GREEN}✓ Created plugin symlink${RESET} ${DIM}(.agents/plugins/wbw-daemon)${RESET}"
 
 cp "$(pwd)/mcp_config.json.template" "$(pwd)/mcp_config.json"
-sed -i "s|\"[^\"]*bin/mcp-bridge.sh\"|\"$PLUGIN_TARGET/bin/mcp-bridge.sh\"|g" "$(pwd)/mcp_config.json"
-echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(Absolute path injected)${RESET}"
+echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(SSE connection activated)${RESET}"
 
 mkdir -p "$LOCAL_BIN_DIR"
 DAEMON_SYMLINK="$LOCAL_BIN_DIR/wbw-daemon"
