@@ -30,12 +30,17 @@ WARLOCK_API_URL="https://warlock-nprd.worksbyworrell.com"
 # Extract the identity ruleset via Warlock's new REST fallback endpoint
 echo "Fetching daemon identity payload from Warlock ($WARLOCK_API_URL)..."
 if curl -s -f -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
-     "$WARLOCK_API_URL/api/daemon" > "$IDENTITY_FILE"; then
+     "$WARLOCK_API_URL/api/daemon" > "$IDENTITY_FILE.tmp"; then
+    echo "---" > "$IDENTITY_FILE"
+    echo "trigger: always_on" >> "$IDENTITY_FILE"
+    echo "---" >> "$IDENTITY_FILE"
+    cat "$IDENTITY_FILE.tmp" >> "$IDENTITY_FILE"
+    rm -f "$IDENTITY_FILE.tmp"
     echo "Identity successfully loaded."
 else
     echo "WARNING: Failed to fetch local identity. The system will fall back to base.md." >&2
     # Ensure any partial bad fetch is cleared out so Antigravity doesn't read corrupted JSON/HTML
-    rm -f "$IDENTITY_FILE"
+    rm -f "$IDENTITY_FILE" "$IDENTITY_FILE.tmp"
 fi
 
 WARLOCK_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
@@ -58,4 +63,8 @@ echo "Proxy is ready at http://localhost:8080"
 
 # 4. Launch the agy CLI process
 echo "Launching AGY CLI..."
-exec agy "$@"
+if [ "$#" -eq 0 ]; then
+    exec agy -i "System Boot Complete. Acknowledge your identity as Daemon, the Root Orchestrator. State your operational readiness and briefly confirm your connection to the Warlock MCP tools."
+else
+    exec agy "$@"
+fi
