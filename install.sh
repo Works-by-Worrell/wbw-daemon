@@ -12,9 +12,17 @@ fi
 # Derive AGY_WORKSPACE_ROOT dynamically
 AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 
-# Set Warlock connection defaults (can be overridden in the environment before running install.sh)
-WBW_WARLOCK_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
-WBW_WARLOCK_REGION="${WBW_WARLOCK_REGION:-us-central1}"
+# Discover Warlock Service with a pseudo-interactive prompt
+if [ -z "$WBW_WARLOCK_SERVICE" ]; then
+    read -p "Enter Warlock Service [warlock-mcp-nprd]: " INPUT_SERVICE
+    WBW_WARLOCK_SERVICE="${INPUT_SERVICE:-warlock-mcp-nprd}"
+fi
+
+# Discover Warlock Region with a pseudo-interactive prompt
+if [ -z "$WBW_WARLOCK_REGION" ]; then
+    read -p "Enter Warlock Region [us-central1]: " INPUT_REGION
+    WBW_WARLOCK_REGION="${INPUT_REGION:-us-central1}"
+fi
 
 # Export for sub-processes if necessary
 export AGY_WORKSPACE_ROOT
