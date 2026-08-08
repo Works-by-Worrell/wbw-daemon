@@ -78,10 +78,18 @@ cp "$(pwd)/mcp_config.json.template" "$(pwd)/mcp_config.json"
 echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(SSE connection activated)${RESET}"
 
 mkdir -p "$LOCAL_BIN_DIR"
+
+# Symlink wbw-daemon
 DAEMON_SYMLINK="$LOCAL_BIN_DIR/wbw-daemon"
 chmod +x "$PLUGIN_TARGET/bin/wbw-daemon"
 ln -sf "$PLUGIN_TARGET/bin/wbw-daemon" "$DAEMON_SYMLINK"
-echo -e "  ${GREEN}✓ Bound executable${RESET} ${DIM}($DAEMON_SYMLINK)${RESET}\n"
+echo -e "  ${GREEN}✓ Bound executable${RESET} ${DIM}($DAEMON_SYMLINK)${RESET}"
+
+# Symlink wbw-mcp-inspect
+INSPECT_SYMLINK="$LOCAL_BIN_DIR/wbw-mcp-inspect"
+chmod +x "$PLUGIN_TARGET/bin/wbw-mcp-inspect"
+ln -sf "$PLUGIN_TARGET/bin/wbw-mcp-inspect" "$INSPECT_SYMLINK"
+echo -e "  ${GREEN}✓ Bound executable${RESET} ${DIM}($INSPECT_SYMLINK)${RESET}\n"
 
 
 # ---------------------------------------------------------
