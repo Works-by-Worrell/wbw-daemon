@@ -3,26 +3,23 @@ set -e
 
 echo "Starting wbw-daemon plugin installation..."
 
-# Discover AGY_OPERATOR_ID with a pseudo-interactive prompt defaulting to $USER
-if [ -z "$AGY_OPERATOR_ID" ]; then
-    read -p "Enter AGY_OPERATOR_ID [$USER]: " INPUT_ID
-    AGY_OPERATOR_ID="${INPUT_ID:-$USER}"
-fi
+# Operator ID: Default to current env, fallback to system user
+DEFAULT_OP_ID="${AGY_OPERATOR_ID:-$USER}"
+read -p "Enter AGY_OPERATOR_ID [$DEFAULT_OP_ID]: " INPUT_ID
+AGY_OPERATOR_ID="${INPUT_ID:-$DEFAULT_OP_ID}"
 
 # Derive AGY_WORKSPACE_ROOT dynamically
 AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 
-# Discover Warlock Service with a pseudo-interactive prompt
-if [ -z "$WBW_WARLOCK_SERVICE" ]; then
-    read -p "Enter Warlock Service [warlock-mcp-nprd]: " INPUT_SERVICE
-    WBW_WARLOCK_SERVICE="${INPUT_SERVICE:-warlock-mcp-nprd}"
-fi
+# Warlock Service: Default to current env, fallback to warlock-mcp-nprd
+DEFAULT_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
+read -p "Enter Warlock Service [$DEFAULT_SERVICE]: " INPUT_SERVICE
+WBW_WARLOCK_SERVICE="${INPUT_SERVICE:-$DEFAULT_SERVICE}"
 
-# Discover Warlock Region with a pseudo-interactive prompt
-if [ -z "$WBW_WARLOCK_REGION" ]; then
-    read -p "Enter Warlock Region [us-central1]: " INPUT_REGION
-    WBW_WARLOCK_REGION="${INPUT_REGION:-us-central1}"
-fi
+# Warlock Region: Default to current env, fallback to us-central1
+DEFAULT_REGION="${WBW_WARLOCK_REGION:-us-central1}"
+read -p "Enter Warlock Region [$DEFAULT_REGION]: " INPUT_REGION
+WBW_WARLOCK_REGION="${INPUT_REGION:-$DEFAULT_REGION}"
 
 # Export for sub-processes if necessary
 export AGY_WORKSPACE_ROOT
