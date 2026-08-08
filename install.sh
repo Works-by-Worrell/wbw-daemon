@@ -1,72 +1,97 @@
 #!/bin/bash
 set -e
 
-echo "Starting wbw-daemon plugin installation..."
+# ANSI Color Codes
+RESET='\033[0m'
+BOLD='\033[1m'
+DIM='\033[2m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
 
-# Operator ID: Default to current env, fallback to system user
+# Clear screen and display banner
+clear
+echo -e "${CYAN}${BOLD}"
+echo "    __      __  ___ _      __    ___                             "
+echo "    \ \    / / | _ ) \    / /___|   \ __ _ ___ _ __  ___ _ _   "
+echo "     \ \/\/ /  | _ \\ \/\/ /|___| |) / _\` / -_) '  \/ _ \ ' \  "
+echo "      \_/\_/   |___/ \_/\_/     |___/\__,_\___|_|_|_\___/_||_| "
+echo "                                                               "
+echo -e "${RESET}"
+echo -e " ${BOLD}Daemon Configuration Wizard${RESET}"
+echo -e " ${DIM}========================================================${RESET}\n"
+
+# ---------------------------------------------------------
+# Phase 1: Configuration
+# ---------------------------------------------------------
+echo -e "${BLUE}${BOLD}[1/3] Environment Configuration${RESET}"
+
+# Operator ID
 DEFAULT_OP_ID="${AGY_OPERATOR_ID:-$USER}"
-read -p "Enter AGY_OPERATOR_ID [$DEFAULT_OP_ID]: " INPUT_ID
+echo -ne "  ${BOLD}? Enter AGY_OPERATOR_ID${RESET} ${DIM}[${DEFAULT_OP_ID}]${RESET}: "
+read INPUT_ID
 AGY_OPERATOR_ID="${INPUT_ID:-$DEFAULT_OP_ID}"
 
-# Derive AGY_WORKSPACE_ROOT dynamically
+# Derive Workspace
 AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 
-# Warlock Service: Default to current env, fallback to warlock-mcp-nprd
+# Warlock Service
 DEFAULT_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
-read -p "Enter Warlock Service [$DEFAULT_SERVICE]: " INPUT_SERVICE
+echo -ne "  ${BOLD}? Enter Warlock Service${RESET} ${DIM}[${DEFAULT_SERVICE}]${RESET}: "
+read INPUT_SERVICE
 WBW_WARLOCK_SERVICE="${INPUT_SERVICE:-$DEFAULT_SERVICE}"
 
-# Warlock Region: Default to current env, fallback to us-central1
+# Warlock Region
 DEFAULT_REGION="${WBW_WARLOCK_REGION:-us-central1}"
-read -p "Enter Warlock Region [$DEFAULT_REGION]: " INPUT_REGION
+echo -ne "  ${BOLD}? Enter Warlock Region${RESET}  ${DIM}[${DEFAULT_REGION}]${RESET}: "
+read INPUT_REGION
 WBW_WARLOCK_REGION="${INPUT_REGION:-$DEFAULT_REGION}"
 
-# Export for sub-processes if necessary
+# Export for sub-processes
 export AGY_WORKSPACE_ROOT
 export AGY_OPERATOR_ID
 export WBW_WARLOCK_SERVICE
 export WBW_WARLOCK_REGION
 
 PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
+LOCAL_BIN_DIR="$HOME/.local/bin"
 
-echo "Workspace Root: $AGY_WORKSPACE_ROOT"
-echo "Operator ID: $AGY_OPERATOR_ID"
+echo -e "\n  ${GREEN}✓ Configuration captured.${RESET}\n"
 
-# Ensure plugins directory exists
+
+# ---------------------------------------------------------
+# Phase 2: Symlinks & MCP Compilation
+# ---------------------------------------------------------
+echo -e "${BLUE}${BOLD}[2/3] System Integration${RESET}"
+
 mkdir -p "$AGY_WORKSPACE_ROOT/.agents/plugins"
 
-# Remove existing symlink or directory
 if [ -e "$PLUGIN_TARGET" ] || [ -L "$PLUGIN_TARGET" ]; then
-    echo "Removing existing installation at $PLUGIN_TARGET"
     rm -rf "$PLUGIN_TARGET"
 fi
 
-# Symlink current repository to the plugins directory
-echo "Symlinking $(pwd) to $PLUGIN_TARGET"
 ln -s "$(pwd)" "$PLUGIN_TARGET"
+echo -e "  ${GREEN}✓ Created plugin symlink${RESET} ${DIM}(.agents/plugins/wbw-daemon)${RESET}"
 
-# Dynamically rewrite mcp_config.json with absolute path
-echo "Updating mcp_config.json with absolute path..."
 cp "$(pwd)/mcp_config.json.template" "$(pwd)/mcp_config.json"
 sed -i "s|\"[^\"]*bin/mcp-bridge.sh\"|\"$PLUGIN_TARGET/bin/mcp-bridge.sh\"|g" "$(pwd)/mcp_config.json"
+echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(Absolute path injected)${RESET}"
 
-# Create an executable symlink in ~/.local/bin
-LOCAL_BIN_DIR="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN_DIR"
-
 DAEMON_SYMLINK="$LOCAL_BIN_DIR/wbw-daemon"
-echo "Symlinking wbw-daemon to $DAEMON_SYMLINK"
-
-# Ensure the source script is executable
 chmod +x "$PLUGIN_TARGET/bin/wbw-daemon"
-# Create the symlink
 ln -sf "$PLUGIN_TARGET/bin/wbw-daemon" "$DAEMON_SYMLINK"
+echo -e "  ${GREEN}✓ Bound executable${RESET} ${DIM}($DAEMON_SYMLINK)${RESET}\n"
 
-# Update ~/.bashrc
+
+# ---------------------------------------------------------
+# Phase 3: Profile Injection
+# ---------------------------------------------------------
+echo -e "${BLUE}${BOLD}[3/3] Profile Injection${RESET}"
+
 BASHRC="$HOME/.bashrc"
 if [ -f "$BASHRC" ]; then
-    echo "Configuring ~/.bashrc..."
-    # Remove existing exports to prevent duplicates
     sed -i '/export AGY_WORKSPACE_ROOT=/d' "$BASHRC"
     sed -i '/export AGY_OPERATOR_ID=/d' "$BASHRC"
     sed -i '/export WBW_WARLOCK_SERVICE=/d' "$BASHRC"
@@ -79,19 +104,21 @@ if [ -f "$BASHRC" ]; then
     echo "export AGY_WORKSPACE_ROOT=\"$AGY_WORKSPACE_ROOT\"" >> "$BASHRC"
     echo "export WBW_WARLOCK_SERVICE=\"$WBW_WARLOCK_SERVICE\"" >> "$BASHRC"
     echo "export WBW_WARLOCK_REGION=\"$WBW_WARLOCK_REGION\"" >> "$BASHRC"
-    echo "Successfully updated ~/.bashrc"
+    echo -e "  ${GREEN}✓ Environment variables persisted to ~/.bashrc${RESET}\n"
+else
+    echo -e "  ${YELLOW}⚠ ~/.bashrc not found. Environment variables were not saved.${RESET}\n"
 fi
 
-echo "wbw-daemon installed successfully."
-echo "Note: Ensure $LOCAL_BIN_DIR is in your system PATH."
 
-echo ""
-echo "============================================================"
-echo "    REQUIRED ACTION: RELOAD YOUR TERMINAL ENVIRONMENT       "
-echo "============================================================"
-echo " You MUST execute the following command before continuing:"
-echo ""
-echo "                   source ~/.bashrc                       "
-echo ""
-echo "============================================================"
-echo ""
+# ---------------------------------------------------------
+# Summary & Handoff
+# ---------------------------------------------------------
+echo -e "${GREEN}${BOLD}Installation Complete!${RESET}"
+echo -e "${DIM}wbw-daemon is now fully configured and bound to your local environment.${RESET}\n"
+
+echo -e "${YELLOW}============================================================${RESET}"
+echo -e "${YELLOW}${BOLD}    REQUIRED ACTION: RELOAD YOUR TERMINAL ENVIRONMENT       ${RESET}"
+echo -e "${YELLOW}============================================================${RESET}"
+echo -e "${BOLD} You MUST execute the following command before continuing:${RESET}\n"
+echo -e "                   ${CYAN}source ~/.bashrc${RESET}\n"
+echo -e "${YELLOW}============================================================${RESET}\n"
