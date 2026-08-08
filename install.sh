@@ -3,9 +3,9 @@ set -e
 
 echo "Starting wbw-daemon plugin installation..."
 
-# Discover or prompt for AGY_OPERATOR_ID
+# Discover AGY_OPERATOR_ID from the system if not provided
 if [ -z "$AGY_OPERATOR_ID" ]; then
-    read -p "Enter AGY_OPERATOR_ID: " AGY_OPERATOR_ID
+    AGY_OPERATOR_ID="$USER"
 fi
 
 # Derive AGY_WORKSPACE_ROOT dynamically
