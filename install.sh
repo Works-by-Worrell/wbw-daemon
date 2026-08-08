@@ -3,15 +3,13 @@ set -e
 
 echo "Starting wbw-daemon plugin installation..."
 
-# Discover or prompt for AGY_WORKSPACE_ROOT
-if [ -z "$AGY_WORKSPACE_ROOT" ]; then
-    read -p "Enter AGY_WORKSPACE_ROOT (e.g., /home/user/workspace): " AGY_WORKSPACE_ROOT
-fi
-
 # Discover or prompt for AGY_OPERATOR_ID
 if [ -z "$AGY_OPERATOR_ID" ]; then
     read -p "Enter AGY_OPERATOR_ID: " AGY_OPERATOR_ID
 fi
+
+# Derive AGY_WORKSPACE_ROOT dynamically
+AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 
 # Export for sub-processes if necessary
 export AGY_WORKSPACE_ROOT
