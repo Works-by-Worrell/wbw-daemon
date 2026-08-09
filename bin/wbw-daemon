@@ -52,7 +52,7 @@ else
     trap 'kill $PROXY_PID 2>/dev/null' EXIT
 
     echo "Waiting for proxy to initialize..."
-    while ! curl -s -I http://localhost:8080/sse | grep -q "200 OK"; do
+    until [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8080/sse)" = "200" ]; do
         sleep 0.5
     done
 fi
