@@ -34,7 +34,6 @@ if curl -s -f -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
     echo "Identity successfully loaded."
     # Inject the operator ID directly into the rules to avoid agent shell evaluation
     sed -i "s/{operator_id}/$AGY_OPERATOR_ID/g" "$IDENTITY_FILE"
-    sed -i "s/The \`operator_id\` should be fetched from the \\\$AGY_OPERATOR_ID environment variable.//g" "$IDENTITY_FILE"
 else
     echo "WARNING: Failed to fetch local identity. The system will fall back to base.md." >&2
     # Ensure any partial bad fetch is cleared out so Antigravity doesn't read corrupted JSON/HTML
