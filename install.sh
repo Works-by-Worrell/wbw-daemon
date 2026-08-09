@@ -73,7 +73,8 @@ cat << EOF > "$PLUGINS_JSON"
 {
   "entries": [
     {
-      "path": "$(pwd)"
+      "path": "$AGY_WORKSPACE_ROOT",
+      "include_only": ["wbw-daemon"]
     }
   ]
 }
