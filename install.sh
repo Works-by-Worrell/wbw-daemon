@@ -61,18 +61,29 @@ echo -e "\n  ${GREEN}✓ Configuration captured.${RESET}\n"
 
 
 # ---------------------------------------------------------
-# Phase 2: Symlinks & MCP Compilation
+# Phase 2: Configuration & MCP Compilation
 # ---------------------------------------------------------
 echo -e "${BLUE}${BOLD}[2/3] System Integration${RESET}"
 
-mkdir -p "$AGY_WORKSPACE_ROOT/.agents/plugins"
+mkdir -p "$AGY_WORKSPACE_ROOT/.agents"
 
+# Create plugins.json to explicitly load the plugin from this directory
+PLUGINS_JSON="$AGY_WORKSPACE_ROOT/.agents/plugins.json"
+cat << EOF > "$PLUGINS_JSON"
+{
+  "entries": [
+    {
+      "path": "$(pwd)"
+    }
+  ]
+}
+EOF
+echo -e "  ${GREEN}✓ Generated plugins.json config${RESET} ${DIM}(.agents/plugins.json)${RESET}"
+
+# Clean up legacy symlink if it exists
 if [ -e "$PLUGIN_TARGET" ] || [ -L "$PLUGIN_TARGET" ]; then
     rm -rf "$PLUGIN_TARGET"
 fi
-
-ln -s "$(pwd)" "$PLUGIN_TARGET"
-echo -e "  ${GREEN}✓ Created plugin symlink${RESET} ${DIM}(.agents/plugins/wbw-daemon)${RESET}"
 
 cp "$(pwd)/mcp_config.json.template" "$(pwd)/mcp_config.json"
 echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(SSE connection activated)${RESET}"
@@ -81,14 +92,14 @@ mkdir -p "$LOCAL_BIN_DIR"
 
 # Symlink wbw-daemon
 DAEMON_SYMLINK="$LOCAL_BIN_DIR/wbw-daemon"
-chmod +x "$PLUGIN_TARGET/bin/wbw-daemon"
-ln -sf "$PLUGIN_TARGET/bin/wbw-daemon" "$DAEMON_SYMLINK"
+chmod +x "$(pwd)/bin/wbw-daemon"
+ln -sf "$(pwd)/bin/wbw-daemon" "$DAEMON_SYMLINK"
 echo -e "  ${GREEN}✓ Bound executable${RESET} ${DIM}($DAEMON_SYMLINK)${RESET}"
 
 # Symlink wbw-mcp-inspect
 INSPECT_SYMLINK="$LOCAL_BIN_DIR/wbw-mcp-inspect"
-chmod +x "$PLUGIN_TARGET/bin/wbw-mcp-inspect"
-ln -sf "$PLUGIN_TARGET/bin/wbw-mcp-inspect" "$INSPECT_SYMLINK"
+chmod +x "$(pwd)/bin/wbw-mcp-inspect"
+ln -sf "$(pwd)/bin/wbw-mcp-inspect" "$INSPECT_SYMLINK"
 echo -e "  ${GREEN}✓ Bound executable${RESET} ${DIM}($INSPECT_SYMLINK)${RESET}\n"
 
 
