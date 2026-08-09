@@ -65,11 +65,9 @@ echo -e "\n  ${GREEN}✓ Configuration captured.${RESET}\n"
 # ---------------------------------------------------------
 echo -e "${BLUE}${BOLD}[2/3] System Integration${RESET}"
 
-mkdir -p "$AGY_WORKSPACE_ROOT/.agents"
+mkdir -p "$HOME/.gemini/config/plugins"
 
-mkdir -p "$AGY_WORKSPACE_ROOT/.agents/plugins"
-
-PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
+PLUGIN_TARGET="$HOME/.gemini/config/plugins/wbw-daemon"
 
 # Clean up legacy symlink or directory if it exists
 if [ -e "$PLUGIN_TARGET" ] || [ -L "$PLUGIN_TARGET" ]; then
@@ -82,7 +80,8 @@ echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(SSE connection ac
 # We must use a hard copy because the Antigravity CLI's plugin scanner (filepath.WalkDir) 
 # strictly ignores symlinks, and plugins.json workspace-relative paths have edge cases.
 cp -r "$(pwd)" "$PLUGIN_TARGET"
-echo -e "  ${GREEN}✓ Installed plugin${RESET} ${DIM}($PLUGIN_TARGET)${RESET}"
+agy plugin enable wbw-daemon >/dev/null 2>&1 || true
+echo -e "  ${GREEN}✓ Installed and enabled plugin${RESET} ${DIM}($PLUGIN_TARGET)${RESET}"
 
 mkdir -p "$LOCAL_BIN_DIR"
 
