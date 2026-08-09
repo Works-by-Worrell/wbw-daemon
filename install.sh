@@ -76,13 +76,13 @@ if [ -e "$PLUGIN_TARGET" ] || [ -L "$PLUGIN_TARGET" ]; then
     rm -rf "$PLUGIN_TARGET"
 fi
 
+cp "$(pwd)/mcp_config.json.template" "$(pwd)/mcp_config.json"
+echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(SSE connection activated)${RESET}"
+
 # We must use a hard copy because the Antigravity CLI's plugin scanner (filepath.WalkDir) 
 # strictly ignores symlinks, and plugins.json workspace-relative paths have edge cases.
 cp -r "$(pwd)" "$PLUGIN_TARGET"
 echo -e "  ${GREEN}✓ Installed plugin${RESET} ${DIM}($PLUGIN_TARGET)${RESET}"
-
-cp "$(pwd)/mcp_config.json.template" "$(pwd)/mcp_config.json"
-echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(SSE connection activated)${RESET}"
 
 mkdir -p "$LOCAL_BIN_DIR"
 
