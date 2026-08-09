@@ -1,7 +1,8 @@
 {
   "mcpServers": {
     "warlock": {
-      "serverUrl": "http://localhost:8080/sse"
+      "command": "python3",
+      "args": ["_PLUGIN_DIR_/bin/mcp-bridge.py"]
     }
   }
 }
