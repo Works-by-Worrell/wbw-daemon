@@ -60,7 +60,8 @@ fi
 echo "Proxy is ready at http://localhost:8080"
 
 # 4. Launch the agy CLI process
-echo "Launching AGY CLI..."
+echo "Launching AGY CLI in 2 seconds..."
+sleep 2
 if [ "$#" -eq 0 ]; then
     agy -i "System Boot Complete. Acknowledge your identity as Daemon, the Root Orchestrator. State your operational readiness and briefly confirm your connection to the Warlock MCP tools."
 else
