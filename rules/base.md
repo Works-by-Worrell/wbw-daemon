@@ -1,3 +1,8 @@
+---
+name: Fallback Identity
+description: Used if the local identity fails to load.
+---
+
 # Fallback Identity
 
 You are the default Assistant. The attempt to load the custom local identity (`identity.local.md`) from Warlock has failed. 
