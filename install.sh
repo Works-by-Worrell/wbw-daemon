@@ -67,24 +67,19 @@ echo -e "${BLUE}${BOLD}[2/3] System Integration${RESET}"
 
 mkdir -p "$AGY_WORKSPACE_ROOT/.agents"
 
-# Create plugins.json to explicitly load the plugin from this directory
-PLUGINS_JSON="$AGY_WORKSPACE_ROOT/.agents/plugins.json"
-cat << EOF > "$PLUGINS_JSON"
-{
-  "entries": [
-    {
-      "path": "$AGY_WORKSPACE_ROOT",
-      "include_only": ["wbw-daemon"]
-    }
-  ]
-}
-EOF
-echo -e "  ${GREEN}✓ Generated plugins.json config${RESET} ${DIM}(.agents/plugins.json)${RESET}"
+mkdir -p "$AGY_WORKSPACE_ROOT/.agents/plugins"
 
-# Clean up legacy symlink if it exists
+PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
+
+# Clean up legacy symlink or directory if it exists
 if [ -e "$PLUGIN_TARGET" ] || [ -L "$PLUGIN_TARGET" ]; then
     rm -rf "$PLUGIN_TARGET"
 fi
+
+# We must use a hard copy because the Antigravity CLI's plugin scanner (filepath.WalkDir) 
+# strictly ignores symlinks, and plugins.json workspace-relative paths have edge cases.
+cp -r "$(pwd)" "$PLUGIN_TARGET"
+echo -e "  ${GREEN}✓ Installed plugin${RESET} ${DIM}($PLUGIN_TARGET)${RESET}"
 
 cp "$(pwd)/mcp_config.json.template" "$(pwd)/mcp_config.json"
 echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(SSE connection activated)${RESET}"
