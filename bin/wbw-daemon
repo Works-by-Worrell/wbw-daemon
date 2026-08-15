@@ -55,9 +55,20 @@ WARLOCK_REGION="${WBW_WARLOCK_REGION:-us-central1}"
 # 3.1 Initialize Warlock MCP Proxy & Background Watchdog
 "$SCRIPT_DIR/mcp-watchdog.sh" --daemon >/dev/null 2>&1 &
 echo "Waiting for Warlock MCP proxy to initialize..."
-until [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8080/sse)" = "200" ]; do
+READY=0
+for i in {1..20}; do
+    HTTP_STATUS="$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8080/sse || true)"
+    if [ "$HTTP_STATUS" = "200" ]; then
+        READY=1
+        break
+    fi
     sleep 0.5
 done
+
+if [ "$READY" -ne 1 ]; then
+    echo "ERROR: Warlock MCP proxy failed to initialize on http://localhost:8080 (last status: ${HTTP_STATUS:-none})." >&2
+    exit 1
+fi
 echo "Proxy is ready at http://localhost:8080"
 
 # 4. Launch the agy CLI process

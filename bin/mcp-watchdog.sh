@@ -38,6 +38,12 @@ ensure_proxy() {
 
 # If run in daemon/loop mode
 if [ "$1" = "--daemon" ]; then
+    DAEMON_LOCK_FILE="/tmp/warlock_mcp_watchdog_daemon.lock"
+    exec 201>"$DAEMON_LOCK_FILE"
+    if ! flock -n 201; then
+        echo "[watchdog] Watchdog daemon already running."
+        exit 0
+    fi
     echo "[watchdog] Starting Warlock proxy watchdog loop (interval: ${CHECK_INTERVAL}s)..."
     while true; do
         ensure_proxy || true
