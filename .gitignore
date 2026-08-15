@@ -8,3 +8,10 @@ node_modules/
 *.local.md
 rules/identity.local.md
 mcp_config.json
+
+# JetBrains / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
