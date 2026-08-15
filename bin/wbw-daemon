@@ -52,19 +52,12 @@ fi
 WARLOCK_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
 WARLOCK_REGION="${WBW_WARLOCK_REGION:-us-central1}"
 
-if (echo > /dev/tcp/127.0.0.1/8080) >/dev/null 2>&1; then
-    echo "Warlock proxy is already running on port 8080."
-else
-    echo "Starting Warlock proxy on port 8080 for MCP SSE connection..."
-    gcloud run services proxy $WARLOCK_SERVICE --region=$WARLOCK_REGION --port 8080 >/dev/null 2>&1 &
-    PROXY_PID=$!
-    trap 'kill $PROXY_PID 2>/dev/null' EXIT
-
-    echo "Waiting for proxy to initialize..."
-    until [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8080/sse)" = "200" ]; do
-        sleep 0.5
-    done
-fi
+# 3.1 Initialize Warlock MCP Proxy & Background Watchdog
+"$SCRIPT_DIR/mcp-watchdog.sh" --daemon >/dev/null 2>&1 &
+echo "Waiting for Warlock MCP proxy to initialize..."
+until [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8080/sse)" = "200" ]; do
+    sleep 0.5
+done
 echo "Proxy is ready at http://localhost:8080"
 
 # 4. Launch the agy CLI process
