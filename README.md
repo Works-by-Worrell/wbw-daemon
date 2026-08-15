@@ -38,5 +38,12 @@ If you modify `bin/mcp-bridge.sh`, `bin/wbw-daemon`, or `install.sh`, you should
 ### Testing Changes
 1. Apply your changes locally.
 2. Run `./install.sh`.
+
+---
+
+## 3. Architecture & Financial Case Studies
+
+- **[Architecture & Cost Optimization Case Study](docs/architecture_cost_case_study.md)**: Detailed analysis of trial-and-error AI costs, 99.8% grounding tool cost reduction, $0.00 GCP Cloud Run free tier tuning, and the Push Package Protocol.
+
 3. Boot `wbw-daemon` from a clean terminal to verify Warlock MCP initialization and identity fetching logic.
 4. Execute diagnostic tools to ensure `mcp-bridge.sh` hasn't destabilized the SSE connection.
