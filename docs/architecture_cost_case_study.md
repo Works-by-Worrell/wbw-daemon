@@ -16,6 +16,26 @@ The **Works-by-Worrell (WBW) Agentic Architecture** solves both problems through
 
 ---
 
+## 0. Conceptual Foundation: The 11 Principles Manifesto
+
+This architecture is not arbitrary—it directly reinforces the [**11 Principles of Software Engineering Manifesto**](file:///home/raworre/Works-by-Worrell/career-exfil/11-principles-manifesto-idea.md):
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        MANIFESTO TO ARCHITECTURE MAPPING                               │
+├───────────────────────────────────────┬────────────────────────────────────────────────┤
+│ Manifesto Principle                   │ Architectural Realization                      │
+├───────────────────────────────────────┼────────────────────────────────────────────────┤
+│ Principle 0: Consent                  │ Push Package Protocol (`gatekeeper.sh` & HitL) │
+│ Principle 4: Radical Self-Reliance    │ Autonomous Subagents (Spike, Dyno) & Self-     │
+│                                       │ Healing MCP Session Auto-Reconnect             │
+│ Principle 8: Leaving No Trace         │ Immutable GCS Log Sync & Purged Hopper Caches  │
+│ Principle 10: Immediacy               │ 2-Second Boot Tunnels & Zero-Delay Local TDD   │
+└───────────────────────────────────────┴────────────────────────────────────────────────┘
+```
+
+---
+
 ## 2. Startup Trial & Error Cost Anatomy: Where the Money Goes
 
 Through live experimentation across the **Eldritch Harvester**, **Warlock MCP**, and **wbw-daemon** ecosystem, we identified three primary cost drivers that drain developer budgets during initial setup:
