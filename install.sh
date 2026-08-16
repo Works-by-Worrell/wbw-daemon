@@ -97,13 +97,15 @@ chmod +x "$(pwd)/bin/gatekeeper.sh" 2>/dev/null || true
 
 # We must use a hard copy because the Antigravity CLI's plugin scanner (filepath.WalkDir) 
 # strictly ignores symlinks, and plugins.json workspace-relative paths have edge cases.
-cp -r "$(pwd)" "$PLUGIN_TARGET"
+# We use rsync to exclude .git, as the scanner ignores directories containing a .git folder.
+mkdir -p "$PLUGIN_TARGET"
+rsync -a --exclude='.git' --exclude='.idea' "$(pwd)/" "$PLUGIN_TARGET/"
 
 # Also sync plugin copy directly into workspace .agents plugin directory
 WS_PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
-mkdir -p "$(dirname "$WS_PLUGIN_TARGET")"
+mkdir -p "$WS_PLUGIN_TARGET"
 rm -rf "$WS_PLUGIN_TARGET"
-cp -r "$(pwd)" "$WS_PLUGIN_TARGET"
+rsync -a --exclude='.git' --exclude='.idea' "$(pwd)/" "$WS_PLUGIN_TARGET/"
 
 agy plugin enable wbw-daemon >/dev/null 2>&1 || true
 echo -e "  ${GREEN}✓ Installed and enabled plugin${RESET} ${DIM}($PLUGIN_TARGET)${RESET}"
