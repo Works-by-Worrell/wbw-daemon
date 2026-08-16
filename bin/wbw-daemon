@@ -3,12 +3,12 @@ set -e
 
 echo "Bootstrapping wbw-daemon..."
 
-# 1. Check authorization
-if ! gcloud auth print-access-token >/dev/null 2>&1; then
-    echo "ERROR: Not authorized. Please run 'gcloud auth login' before starting the daemon." >&2
+# 1. Check for GITHUB_TOKEN
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo "ERROR: GITHUB_TOKEN environment variable is not set. Required for decoupled Edge-Execution." >&2
     exit 1
 fi
-echo "GCP Authorization verified."
+echo "GitHub Authorization verified."
 
 # 2. Ensure AGY_OPERATOR_ID is set
 if [ -z "$AGY_OPERATOR_ID" ]; then
@@ -17,27 +17,18 @@ if [ -z "$AGY_OPERATOR_ID" ]; then
 fi
 
 # 3. Retrieve payload from Warlock and write to rules/identity.local.md
-# Resolve real path in case this is executed via symlink in ~/.local/bin
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 IDENTITY_FILE="$SCRIPT_DIR/../rules/identity.local.md"
 
-# Ensure the rules directory exists
 mkdir -p "$(dirname "$IDENTITY_FILE")"
 
-# Hardcode to the Mayor's preferred custom domain
-WARLOCK_API_URL="https://warlock-nprd.worksbyworrell.com"
-
-# Extract the identity ruleset via Warlock's new REST fallback endpoint
-echo "Fetching daemon identity payload from Warlock ($WARLOCK_API_URL)..."
-if curl -s -f -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
-     "$WARLOCK_API_URL/api/daemon" > "$IDENTITY_FILE"; then
+echo "Fetching daemon identity payload from GitHub API (Edge-Execution)..."
+if curl -s -f -H "Authorization: Bearer $GITHUB_TOKEN" \
+     -H "Accept: application/vnd.github.v3.raw" \
+     "https://api.github.com/repos/Works-by-Worrell/wbw-config-private/contents/agents/daemon.md" > "$IDENTITY_FILE"; then
     echo "Identity successfully loaded."
-    # Inject the operator ID directly into the rules to avoid agent shell evaluation
     sed -i "s/{operator_id}/$AGY_OPERATOR_ID/g" "$IDENTITY_FILE"
 
-    # Hard copy to the Antigravity plugin directory.
-    # The AGY plugin scanner does not follow symlinks — a direct copy is required.
-    # This runs AFTER sed so {operator_id} is already substituted in the destination.
     AGY_WORKSPACE_ROOT="${AGY_WORKSPACE_ROOT:-/home/$AGY_OPERATOR_ID/Works-by-Worrell}"
     AGY_PLUGIN_IDENTITY="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon/rules/identity.local.md"
     mkdir -p "$(dirname "$AGY_PLUGIN_IDENTITY")"
@@ -45,31 +36,10 @@ if curl -s -f -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
     echo "Identity synced to AGY plugin directory ($AGY_PLUGIN_IDENTITY)."
 else
     echo "WARNING: Failed to fetch local identity. The system will fall back to base.md." >&2
-    # Ensure any partial bad fetch is cleared out so Antigravity doesn't read corrupted JSON/HTML
     rm -f "$IDENTITY_FILE"
 fi
 
-WARLOCK_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
-WARLOCK_REGION="${WBW_WARLOCK_REGION:-us-central1}"
-
-# 3.1 Initialize Warlock MCP Proxy & Background Watchdog
-"$SCRIPT_DIR/mcp-watchdog.sh" --daemon >/dev/null 2>&1 &
-echo "Waiting for Warlock MCP proxy to initialize..."
-READY=0
-for i in {1..20}; do
-    HTTP_STATUS="$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:8080/sse || true)"
-    if [ "$HTTP_STATUS" = "200" ]; then
-        READY=1
-        break
-    fi
-    sleep 0.5
-done
-
-if [ "$READY" -ne 1 ]; then
-    echo "ERROR: Warlock MCP proxy failed to initialize on http://localhost:8080 (last status: ${HTTP_STATUS:-none})." >&2
-    exit 1
-fi
-echo "Proxy is ready at http://localhost:8080"
+echo "Warlock MCP Proxy is bypassed. Relying on local uvx/Docker sidecar."
 
 # 4. Launch the agy CLI process
 echo "Launching AGY CLI in 2 seconds..."

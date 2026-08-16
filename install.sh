@@ -36,23 +36,9 @@ AGY_OPERATOR_ID="${INPUT_ID:-$DEFAULT_OP_ID}"
 # Derive Workspace
 AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 
-# Warlock Service
-DEFAULT_SERVICE="${WBW_WARLOCK_SERVICE:-warlock-mcp-nprd}"
-echo -ne "  ${BOLD}? Enter Warlock Service${RESET} ${DIM}[${DEFAULT_SERVICE}]${RESET}: "
-read INPUT_SERVICE
-WBW_WARLOCK_SERVICE="${INPUT_SERVICE:-$DEFAULT_SERVICE}"
-
-# Warlock Region
-DEFAULT_REGION="${WBW_WARLOCK_REGION:-us-central1}"
-echo -ne "  ${BOLD}? Enter Warlock Region${RESET}  ${DIM}[${DEFAULT_REGION}]${RESET}: "
-read INPUT_REGION
-WBW_WARLOCK_REGION="${INPUT_REGION:-$DEFAULT_REGION}"
-
 # Export for sub-processes
 export AGY_WORKSPACE_ROOT
 export AGY_OPERATOR_ID
-export WBW_WARLOCK_SERVICE
-export WBW_WARLOCK_REGION
 
 PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
 LOCAL_BIN_DIR="$HOME/.local/bin"
@@ -127,8 +113,6 @@ if [ -f "$BASHRC" ]; then
     echo "# Works-by-Worrell Config" >> "$BASHRC"
     echo "export AGY_OPERATOR_ID=\"$AGY_OPERATOR_ID\"" >> "$BASHRC"
     echo "export AGY_WORKSPACE_ROOT=\"$AGY_WORKSPACE_ROOT\"" >> "$BASHRC"
-    echo "export WBW_WARLOCK_SERVICE=\"$WBW_WARLOCK_SERVICE\"" >> "$BASHRC"
-    echo "export WBW_WARLOCK_REGION=\"$WBW_WARLOCK_REGION\"" >> "$BASHRC"
     echo -e "  ${GREEN}✓ Environment variables persisted to ~/.bashrc${RESET}\n"
 else
     echo -e "  ${YELLOW}⚠ ~/.bashrc not found. Environment variables were not saved.${RESET}\n"

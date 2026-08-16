@@ -1,8 +1,13 @@
 {
   "mcpServers": {
     "warlock": {
-      "command": "python3",
-      "args": ["_PLUGIN_DIR_/bin/mcp-bridge.py"]
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_TOKEN",
+        "ghcr.io/works-by-worrell/warlock-mcp:latest",
+        "--transport", "stdio"
+      ]
     }
   }
 }
