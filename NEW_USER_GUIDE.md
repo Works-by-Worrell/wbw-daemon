@@ -1,12 +1,12 @@
 # Works-by-Worrell: Workspace Setup & New User Guide
 
-Welcome to the Works-by-Worrell engineering ecosystem. This guide dictates how to initialize a fresh workstation and securely boot your agentic development environment.
+Welcome to the Works-by-Worrell engineering ecosystem. This guide dictates how to initialize a fresh workstation and securely boot your agentic development environment using our decentralized edge-execution architecture.
 
 ## 1. Prerequisites
 Before installing the daemon, ensure you have the following configured on your machine:
-*   **Google Cloud CLI (`gcloud`)**: Must be installed, and you must run `gcloud auth login` and `gcloud config set project works-by-worrell` to authenticate against the infrastructure.
-*   **Node.js / npx**: Required for the `@modelcontextprotocol/server-remote` transport.
+*   **Docker**: Required to run the isolated `warlock-mcp` sidecar containers.
 *   **Git**: Required for repository cloning and version control.
+*   **GitHub Personal Access Token**: You must generate a classic GitHub Personal Access Token (PAT) with `repo` scope to grant the agent access to private configurations and repositories.
 
 ---
 
@@ -36,8 +36,8 @@ The installation script will securely wire the plugin into your workspace and mu
    ```bash
    ./install.sh
    ```
-2. When prompted, provide your **Workspace Root** (e.g., `/home/<user>/Works-by-Worrell`).
-3. When prompted, provide your **Operator ID** (e.g., `raworre` or `spike`).
+2. When prompted, provide your **Operator ID** (e.g., `raworre` or `spike`).
+3. When prompted, provide your **GitHub Personal Access Token** (This securely provisions the Edge-Execution context).
 4. **Source your terminal** to load the newly injected environment variables, or simply restart your terminal application.
    ```bash
    source ~/.bashrc
@@ -53,14 +53,14 @@ With installation complete, your system `PATH` now contains the `wbw-daemon` com
    ```bash
    wbw-daemon
    ```
-3. The daemon will automatically use your authentication context to query the Warlock MCP server, download your personalized Identity Profile, spin up the secure cloud-tunnel proxy, and drop you into an initialized Antigravity session.
+3. The daemon will automatically use your GitHub credentials to download your personalized Identity Profile directly from the API, spin up the local Docker-based Warlock MCP sidecar, and drop you into an initialized Antigravity session.
 
 ---
 
 ## 5. Cloning Remaining Repositories
 Once your daemon is running, you can leverage it (or standard git commands) to pull down the remainder of the ecosystem architecture:
 *   `wbw-architecture`
-*   `wbw-config`
+*   `wbw-config-private`
 *   `warlock-mcp`
 *   `eldritch-harvester`
 *   (And any other active projects).
