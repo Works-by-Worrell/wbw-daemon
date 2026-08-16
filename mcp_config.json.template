@@ -5,6 +5,8 @@
       "args": [
         "run", "-i", "--rm",
         "-e", "GITHUB_TOKEN",
+        "-e", "YOUTRACK_URL",
+        "-e", "YOUTRACK_TOKEN",
         "ghcr.io/works-by-worrell/warlock-mcp:latest",
         "--transport", "stdio"
       ]

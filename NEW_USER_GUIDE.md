@@ -7,6 +7,7 @@ Before installing the daemon, ensure you have the following configured on your m
 *   **Docker**: Required to run the isolated `warlock-mcp` sidecar containers.
 *   **Git**: Required for repository cloning and version control.
 *   **GitHub Personal Access Token**: You must generate a classic GitHub Personal Access Token (PAT) with `repo` scope to grant the agent access to private configurations and repositories.
+*   **YouTrack Permanent Token**: Required for the Warlock MCP agent to manage Kanban boards and update issues. You will also need the URL of your YouTrack instance.
 
 ---
 
@@ -38,7 +39,8 @@ The installation script will securely wire the plugin into your workspace and mu
    ```
 2. When prompted, provide your **Operator ID** (e.g., `raworre` or `spike`).
 3. When prompted, provide your **GitHub Personal Access Token** (This securely provisions the Edge-Execution context).
-4. **Source your terminal** to load the newly injected environment variables, or simply restart your terminal application.
+4. When prompted, provide your **YouTrack URL** and **YouTrack Permanent Token** (Required for ticket tracking).
+5. **Source your terminal** to load the newly injected environment variables, or simply restart your terminal application.
    ```bash
    source ~/.bashrc
    ```

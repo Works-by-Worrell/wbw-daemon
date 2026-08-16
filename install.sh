@@ -43,6 +43,21 @@ if [ -z "$GITHUB_TOKEN" ]; then
     echo -e "  ${YELLOW}⚠ WARNING: GITHUB_TOKEN is required for daemon identity resolution.${RESET}"
 fi
 
+# YouTrack Configuration
+DEFAULT_YT_URL="${YOUTRACK_URL:-https://warlock-exfil.youtrack.cloud}"
+echo -ne "  ${BOLD}? Enter YouTrack URL${RESET} ${DIM}[${DEFAULT_YT_URL}]${RESET}: "
+read INPUT_YT_URL
+YOUTRACK_URL="${INPUT_YT_URL:-$DEFAULT_YT_URL}"
+
+DEFAULT_YT_TOKEN="${YOUTRACK_TOKEN:-}"
+echo -ne "  ${BOLD}? Enter YouTrack Permanent Token${RESET} ${DIM}[${DEFAULT_YT_TOKEN:0:5}...${DEFAULT_YT_TOKEN: -4}]${RESET}: "
+read INPUT_YT_TOKEN
+YOUTRACK_TOKEN="${INPUT_YT_TOKEN:-$DEFAULT_YT_TOKEN}"
+
+if [ -z "$YOUTRACK_TOKEN" ]; then
+    echo -e "  ${YELLOW}⚠ WARNING: YOUTRACK_TOKEN is required for the Warlock MCP agent to manage Kanban boards.${RESET}"
+fi
+
 # Derive Workspace
 AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 
@@ -50,6 +65,8 @@ AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 export AGY_WORKSPACE_ROOT
 export AGY_OPERATOR_ID
 export GITHUB_TOKEN
+export YOUTRACK_URL
+export YOUTRACK_TOKEN
 
 PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
 LOCAL_BIN_DIR="$HOME/.local/bin"
@@ -127,6 +144,14 @@ if [ -f "$BASHRC" ]; then
     
     if [ -n "$GITHUB_TOKEN" ]; then
         echo "export GITHUB_TOKEN=\"$GITHUB_TOKEN\"" >> "$BASHRC"
+    fi
+    
+    if [ -n "$YOUTRACK_URL" ]; then
+        echo "export YOUTRACK_URL=\"$YOUTRACK_URL\"" >> "$BASHRC"
+    fi
+    
+    if [ -n "$YOUTRACK_TOKEN" ]; then
+        echo "export YOUTRACK_TOKEN=\"$YOUTRACK_TOKEN\"" >> "$BASHRC"
     fi
     
     echo -e "  ${GREEN}✓ Environment variables persisted to ~/.bashrc${RESET}\n"
