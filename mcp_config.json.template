@@ -3,7 +3,7 @@
     "warlock": {
       "command": "docker",
       "args": [
-        "run", "-i", "--rm",
+        "run", "-i", "--rm", "--pull=always",
         "-e", "GITHUB_TOKEN",
         "-e", "YOUTRACK_URL",
         "-e", "YOUTRACK_TOKEN",
