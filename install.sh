@@ -95,20 +95,10 @@ echo -e "  ${GREEN}✓ Compiled mcp_config.json${RESET} ${DIM}(Stdio bridge acti
 # Ensure gatekeeper hook script is executable
 chmod +x "$(pwd)/bin/gatekeeper.sh" 2>/dev/null || true
 
-# We must use a hard copy because the Antigravity CLI's plugin scanner (filepath.WalkDir) 
-# strictly ignores symlinks, and plugins.json workspace-relative paths have edge cases.
-# We use rsync to exclude .git, as the scanner ignores directories containing a .git folder.
-mkdir -p "$PLUGIN_TARGET"
-rsync -a --exclude='.git' --exclude='.idea' "$(pwd)/" "$PLUGIN_TARGET/"
-
-# Also sync plugin copy directly into workspace .agents plugin directory
-WS_PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
-mkdir -p "$WS_PLUGIN_TARGET"
-rm -rf "$WS_PLUGIN_TARGET"
-rsync -a --exclude='.git' --exclude='.idea' "$(pwd)/" "$WS_PLUGIN_TARGET/"
-
+# Install the plugin via the CLI to ensure it is properly registered in the imports state
+agy plugin install "$(pwd)" >/dev/null 2>&1 || true
 agy plugin enable wbw-daemon >/dev/null 2>&1 || true
-echo -e "  ${GREEN}✓ Installed and enabled plugin${RESET} ${DIM}($PLUGIN_TARGET)${RESET}"
+echo -e "  ${GREEN}✓ Installed and enabled plugin${RESET} ${DIM}(wbw-daemon)${RESET}"
 echo -e "  ${GREEN}✓ Configured command gatekeeper hook${RESET} ${DIM}(hooks.json & bin/gatekeeper.sh)${RESET}"
 
 mkdir -p "$LOCAL_BIN_DIR"
