@@ -33,12 +33,23 @@ echo -ne "  ${BOLD}? Enter AGY_OPERATOR_ID${RESET} ${DIM}[${DEFAULT_OP_ID}]${RES
 read INPUT_ID
 AGY_OPERATOR_ID="${INPUT_ID:-$DEFAULT_OP_ID}"
 
+# GitHub Token
+DEFAULT_TOKEN="${GITHUB_TOKEN:-}"
+echo -ne "  ${BOLD}? Enter GitHub Personal Access Token (for Edge-Execution)${RESET} ${DIM}[${DEFAULT_TOKEN:0:5}...${DEFAULT_TOKEN: -4}]${RESET}: "
+read INPUT_TOKEN
+GITHUB_TOKEN="${INPUT_TOKEN:-$DEFAULT_TOKEN}"
+
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo -e "  ${YELLOW}⚠ WARNING: GITHUB_TOKEN is required for daemon identity resolution.${RESET}"
+fi
+
 # Derive Workspace
 AGY_WORKSPACE_ROOT="/home/${AGY_OPERATOR_ID}/Works-by-Worrell"
 
 # Export for sub-processes
 export AGY_WORKSPACE_ROOT
 export AGY_OPERATOR_ID
+export GITHUB_TOKEN
 
 PLUGIN_TARGET="$AGY_WORKSPACE_ROOT/.agents/plugins/wbw-daemon"
 LOCAL_BIN_DIR="$HOME/.local/bin"
@@ -113,6 +124,11 @@ if [ -f "$BASHRC" ]; then
     echo "# Works-by-Worrell Config" >> "$BASHRC"
     echo "export AGY_OPERATOR_ID=\"$AGY_OPERATOR_ID\"" >> "$BASHRC"
     echo "export AGY_WORKSPACE_ROOT=\"$AGY_WORKSPACE_ROOT\"" >> "$BASHRC"
+    
+    if [ -n "$GITHUB_TOKEN" ]; then
+        echo "export GITHUB_TOKEN=\"$GITHUB_TOKEN\"" >> "$BASHRC"
+    fi
+    
     echo -e "  ${GREEN}✓ Environment variables persisted to ~/.bashrc${RESET}\n"
 else
     echo -e "  ${YELLOW}⚠ ~/.bashrc not found. Environment variables were not saved.${RESET}\n"
