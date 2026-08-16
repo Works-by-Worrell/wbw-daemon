@@ -22,10 +22,12 @@ IDENTITY_FILE="$SCRIPT_DIR/../rules/identity.local.md"
 
 mkdir -p "$(dirname "$IDENTITY_FILE")"
 
-echo "Fetching daemon identity payload from GitHub API (Edge-Execution)..."
-if curl -s -f -H "Authorization: Bearer $GITHUB_TOKEN" \
-     -H "Accept: application/vnd.github.v3.raw" \
-     "https://api.github.com/repos/Works-by-Worrell/wbw-config-private/contents/agents/daemon.md" > "$IDENTITY_FILE"; then
+echo "Fetching daemon identity payload from worksbyworrell-core (Edge-Execution)..."
+if uv run --with "worksbyworrell-core>=0.1.2" python -c '
+import sys
+from worksbyworrell.core.repository import get_agent_repository
+print(get_agent_repository().get_agent(sys.argv[1]).get("system_prompt", ""))
+' daemon > "$IDENTITY_FILE"; then
     echo "Identity successfully loaded."
     sed -i "s/{operator_id}/$AGY_OPERATOR_ID/g" "$IDENTITY_FILE"
 
