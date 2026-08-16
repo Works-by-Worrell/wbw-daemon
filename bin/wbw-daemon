@@ -47,7 +47,7 @@ echo "Warlock MCP Proxy is bypassed. Relying on local uvx/Docker sidecar."
 echo "Launching AGY CLI in 2 seconds..."
 sleep 2
 if [ "$#" -eq 0 ]; then
-    agy --agent daemon -i "System boot complete. Announce yourself, your operator, and your available capabilities."
+    agy --agent daemon -i "System boot complete. Call fetch_user_profile before responding. Then announce yourself, your operator, and your available capabilities."
 else
     agy --agent daemon "$@"
 fi

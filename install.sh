@@ -99,6 +99,11 @@ chmod +x "$(pwd)/bin/gatekeeper.sh" 2>/dev/null || true
 agy plugin install "$(pwd)" >/dev/null 2>&1 || true
 agy plugin enable wbw-daemon >/dev/null 2>&1 || true
 echo -e "  ${GREEN}✓ Installed and enabled plugin${RESET} ${DIM}(wbw-daemon)${RESET}"
+
+# Bypass Antigravity CLI plugin discovery bug by registering MCP globally
+cp "$(pwd)/mcp_config.json" "$HOME/.gemini/config/mcp_config.json"
+echo -e "  ${GREEN}✓ Registered MCP globally${RESET} ${DIM}(Bypass plugin discovery bug)${RESET}"
+
 echo -e "  ${GREEN}✓ Configured command gatekeeper hook${RESET} ${DIM}(hooks.json & bin/gatekeeper.sh)${RESET}"
 
 mkdir -p "$LOCAL_BIN_DIR"
