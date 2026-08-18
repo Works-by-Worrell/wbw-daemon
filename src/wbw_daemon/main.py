@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from google.antigravity import Agent, LocalAgentConfig, policy
-from google.antigravity.types import McpStreamableHttpServer
+from google.antigravity.types import McpStdioServer
 
 
 async def read_line(stream):
@@ -20,10 +20,24 @@ def get_identity_prompt() -> str:
 
 
 async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
+    env_file = str(Path.home() / ".wbw" / ".env")
     config = LocalAgentConfig(
         system_instructions=get_identity_prompt(),
         mcp_servers=[
-            McpStreamableHttpServer(name="warlock", url="http://localhost:8080/sse")
+            McpStdioServer(
+                name="warlock",
+                command="docker",
+                args=[
+                    "run",
+                    "-i",
+                    "--rm",
+                    "--env-file",
+                    env_file,
+                    "ghcr.io/works-by-worrell/warlock-mcp:latest",
+                    "--transport",
+                    "stdio",
+                ],
+            )
         ],
         policies=[policy.allow_all()],
     )
