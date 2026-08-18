@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from google.antigravity import Agent, LocalAgentConfig, policy
-from google.antigravity.types import McpStdioServer
+from google.antigravity.types import CapabilitiesConfig, McpStdioServer
 
 
 async def read_line(stream):
@@ -23,6 +23,8 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
     env_file = str(Path.home() / ".wbw" / ".env")
     config = LocalAgentConfig(
         system_instructions=get_identity_prompt(),
+        capabilities=CapabilitiesConfig(enable_subagents=True),
+        app_data_dir=str(Path.home() / ".gemini" / "antigravity-cli"),
         mcp_servers=[
             McpStdioServer(
                 name="warlock",
