@@ -27,7 +27,7 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
         with open(env_file, "r") as f:
             for line in f:
                 line = line.strip()
-                if line.startswith("GEMINI_API_KEY="):
+                if line.startswith("DAEMON_GEMINI_API_KEY="):
                     val = line.split("=", 1)[1].strip()
                     if val:
                         api_key = val
