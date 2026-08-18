@@ -48,11 +48,7 @@ async def test_interactive_loop_chat(mock_config_cls, mock_agent_cls):
 
         async def __anext__(self):
             try:
-
-                class Delta:
-                    text = next(self.iter)
-
-                return Delta()
+                return next(self.iter)
             except StopIteration:
                 raise StopAsyncIteration
 

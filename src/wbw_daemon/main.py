@@ -56,11 +56,14 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
                 break
 
             if line:
-                response = await agent.chat(line)
-                async for chunk in response:
-                    out_stream.write(chunk.text)
-                    out_stream.flush()
-                out_stream.write("\n")
+                try:
+                    response = await agent.chat(line)
+                    async for chunk in response:
+                        out_stream.write(chunk)
+                        out_stream.flush()
+                    out_stream.write("\n")
+                except Exception as e:
+                    out_stream.write(f"\nError: {str(e)}\n")
 
 
 def main():
