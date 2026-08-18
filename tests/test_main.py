@@ -1,5 +1,5 @@
 import io
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -7,70 +7,61 @@ from wbw_daemon.main import interactive_loop
 
 
 @pytest.mark.asyncio
-async def test_interactive_loop_exit_command():
+@patch("wbw_daemon.main.Agent")
+@patch("wbw_daemon.main.LocalAgentConfig")
+async def test_interactive_loop_exit_command(mock_config_cls, mock_agent_cls):
+    in_stream = io.StringIO("exit\n")
+    out_stream = io.StringIO()
+
+    mock_agent = AsyncMock()
+    mock_agent_cls.return_value = mock_agent
+    mock_agent.__aenter__.return_value = mock_agent
+
+    await interactive_loop(in_stream=in_stream, out_stream=out_stream)
+
+    output = out_stream.getvalue()
+    assert "> " in output
+
+
+@pytest.mark.asyncio
+@patch("wbw_daemon.main.Agent")
+@patch("wbw_daemon.main.LocalAgentConfig")
+async def test_interactive_loop_chat(mock_config_cls, mock_agent_cls):
     in_stream = io.StringIO("hello\nexit\n")
     out_stream = io.StringIO()
 
-    await interactive_loop(in_stream=in_stream, out_stream=out_stream)
+    mock_agent = AsyncMock()
+    mock_agent_cls.return_value = mock_agent
+    mock_agent.__aenter__.return_value = mock_agent
 
-    output = out_stream.getvalue()
-    assert "> Echo: hello\n> " == output
+    mock_response = AsyncMock()
 
+    class AsyncGenMock:
+        def __init__(self, items):
+            self.items = items
+            self.iter = iter(items)
 
-@pytest.mark.asyncio
-async def test_interactive_loop_eof():
-    in_stream = io.StringIO("test eof\n")
-    out_stream = io.StringIO()
+        def __aiter__(self):
+            return self
 
-    await interactive_loop(in_stream=in_stream, out_stream=out_stream)
+        async def __anext__(self):
+            try:
 
-    output = out_stream.getvalue()
-    assert "> Echo: test eof\n> \n" == output
+                class Delta:
+                    text = next(self.iter)
 
+                return Delta()
+            except StopIteration:
+                raise StopAsyncIteration
 
-@pytest.mark.asyncio
-@patch("wbw_daemon.main.sse_client")
-@patch("wbw_daemon.main.ClientSession")
-async def test_interactive_loop_tools_command(mock_client_session, mock_sse_client):
-    in_stream = io.StringIO("/tools\nexit\n")
-    out_stream = io.StringIO()
+    def iter_mock():
+        return AsyncGenMock(["Hi", " there"]).__aiter__()
 
-    # Setup mocks
-    mock_sse_ctx = AsyncMock()
-    mock_sse_client.return_value = mock_sse_ctx
-    mock_sse_ctx.__aenter__.return_value = (AsyncMock(), AsyncMock())
-
-    mock_session_ctx = AsyncMock()
-    mock_client_session.return_value = mock_session_ctx
-
-    mock_session = AsyncMock()
-    mock_session_ctx.__aenter__.return_value = mock_session
-
-    # Mock tool list response
-    mock_tool1 = MagicMock()
-    mock_tool1.name = "tool_1"
-    mock_tool2 = MagicMock()
-    mock_tool2.name = "tool_2"
-    mock_session.list_tools.return_value = MagicMock(tools=[mock_tool1, mock_tool2])
+    mock_response.__aiter__.side_effect = iter_mock
+    mock_agent.chat.return_value = mock_response
 
     await interactive_loop(in_stream=in_stream, out_stream=out_stream)
 
     output = out_stream.getvalue()
-    assert "> tool_1, tool_2\n> " in output or "tool_1" in output
-    mock_session.list_tools.assert_called_once()
-    mock_session.initialize.assert_called_once()
-
-
-@pytest.mark.asyncio
-@patch("wbw_daemon.main.sse_client")
-async def test_interactive_loop_tools_command_failure(mock_sse_client):
-    in_stream = io.StringIO("/tools\nexit\n")
-    out_stream = io.StringIO()
-
-    # Simulate connection failure
-    mock_sse_client.side_effect = Exception("Connection refused")
-
-    await interactive_loop(in_stream=in_stream, out_stream=out_stream)
-
-    output = out_stream.getvalue()
-    assert "MCP server offline or unreachable" in output
+    assert "Hi there\n" in output
+    mock_agent.chat.assert_called_once_with("hello")

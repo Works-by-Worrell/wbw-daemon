@@ -1,9 +1,9 @@
 import asyncio
-import contextlib
 import sys
+from pathlib import Path
 
-from mcp.client.session import ClientSession
-from mcp.client.sse import sse_client
+from google.antigravity import Agent, LocalAgentConfig, policy
+from google.antigravity.types import McpStreamableHttpServer
 
 
 async def read_line(stream):
@@ -11,19 +11,24 @@ async def read_line(stream):
     return await loop.run_in_executor(None, stream.readline)
 
 
-@contextlib.asynccontextmanager
-async def mcp_session(url: str):
-    try:
-        async with sse_client(url) as streams:
-            async with ClientSession(streams[0], streams[1]) as session:
-                await session.initialize()
-                yield session
-    except Exception:
-        yield None
+def get_identity_prompt() -> str:
+    identity_path = Path(".agents/plugins/wbw-daemon/rules/identity.local.md")
+    if identity_path.exists():
+        return identity_path.read_text()
+    # Fallback to basic stub if file not found
+    return "You are Daemon, the Works-by-Worrell core Orchestrator agent."
 
 
 async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
-    async with mcp_session("http://localhost:8080/sse") as session:
+    config = LocalAgentConfig(
+        system_instructions=get_identity_prompt(),
+        mcp_servers=[
+            McpStreamableHttpServer(name="warlock", url="http://localhost:8080/sse")
+        ],
+        policies=[policy.allow_all()],
+    )
+
+    async with Agent(config) as agent:
         while True:
             out_stream.write("> ")
             out_stream.flush()
@@ -31,22 +36,17 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
             if not line:
                 out_stream.write("\n")
                 break
+
             line = line.strip()
             if line == "exit":
                 break
-            if line == "/tools":
-                if session is None:
-                    out_stream.write("MCP server offline or unreachable\n")
-                else:
-                    try:
-                        tools = await session.list_tools()
-                        tool_names = ", ".join(t.name for t in tools.tools)
-                        out_stream.write(f"{tool_names}\n")
-                    except Exception:
-                        out_stream.write("MCP server offline or unreachable\n")
-                continue
+
             if line:
-                out_stream.write(f"Echo: {line}\n")
+                response = await agent.chat(line)
+                async for chunk in response:
+                    out_stream.write(chunk.text)
+                    out_stream.flush()
+                out_stream.write("\n")
 
 
 def main():
