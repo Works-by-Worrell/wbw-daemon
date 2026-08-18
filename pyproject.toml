@@ -6,12 +6,14 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "google-antigravity",
+    "mcp",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest",
     "pytest-asyncio",
+    "pytest-mock",
     "ruff",
 ]
 
