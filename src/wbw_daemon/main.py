@@ -3,7 +3,12 @@ import sys
 from pathlib import Path
 
 from google.antigravity import Agent, LocalAgentConfig, policy
-from google.antigravity.types import AgentBehavior, BuiltinTools, CapabilitiesConfig, McpStdioServer
+from google.antigravity.types import (
+    AgentBehavior,
+    BuiltinTools,
+    CapabilitiesConfig,
+    McpStdioServer,
+)
 
 
 async def read_line(stream):
