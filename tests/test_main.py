@@ -88,6 +88,9 @@ async def test_interactive_loop_configures_daemon(mock_config_cls, mock_agent_cl
     assert isinstance(capabilities, CapabilitiesConfig)
     assert capabilities.enable_subagents is True
 
+    assert "app_data_dir" in kwargs
+    assert kwargs["app_data_dir"] == str(Path.home() / ".gemini" / "antigravity-cli")
+
     assert "mcp_servers" in kwargs
     servers = kwargs["mcp_servers"]
     assert len(servers) == 1

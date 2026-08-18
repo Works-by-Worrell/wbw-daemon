@@ -24,6 +24,7 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
     config = LocalAgentConfig(
         system_instructions=get_identity_prompt(),
         capabilities=CapabilitiesConfig(enable_subagents=True),
+        app_data_dir=str(Path.home() / ".gemini" / "antigravity-cli"),
         mcp_servers=[
             McpStdioServer(
                 name="warlock",
