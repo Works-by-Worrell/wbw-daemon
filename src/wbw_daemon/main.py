@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from google.antigravity import Agent, LocalAgentConfig, policy
-from google.antigravity.types import BuiltinTools, CapabilitiesConfig, McpStdioServer
+from google.antigravity.types import AgentBehavior, BuiltinTools, CapabilitiesConfig, McpStdioServer
 
 
 async def read_line(stream):
@@ -38,7 +38,9 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
     config_kwargs = dict(
         system_instructions=get_identity_prompt(),
         capabilities=CapabilitiesConfig(
-            enable_subagents=True, enabled_tools=[BuiltinTools.ASK_QUESTION]
+            enable_subagents=True, 
+            enabled_tools=[BuiltinTools.ASK_QUESTION],
+            agent_behavior=AgentBehavior.INTERACTIVE
         ),
         app_data_dir=str(Path.home() / ".gemini" / "antigravity-cli"),
         mcp_servers=[

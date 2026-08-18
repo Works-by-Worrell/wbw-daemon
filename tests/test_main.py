@@ -131,7 +131,7 @@ async def test_interactive_loop_with_api_key(mock_config_cls, mock_agent_cls):
     mock_open_fn = patch(
         "builtins.open",
         new_callable=mock_open,
-        read_data="GEMINI_API_KEY=test_key_123\n",
+        read_data="DAEMON_GEMINI_API_KEY=test_key_123\n",
     )
 
     with mock_open_fn:
