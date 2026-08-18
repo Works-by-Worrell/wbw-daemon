@@ -1,49 +1,53 @@
-# Works-by-Worrell: Daemon Global Agent Setup (`wbw-daemon`)
+# Works-by-Worrell: SDK Orchestrator (\`wbw-daemon\`)
 
-This repository houses the global configuration plugin, bootstrapper, and installation scripts for the **Works-by-Worrell Daemon** (the Antigravity agent). 
+This repository houses the Python SDK Orchestrator for the **Works-by-Worrell** autonomous agent swarm. 
+
+It utilizes the \`google-antigravity\` Python framework to create a stateful, terminal-based Command Center that dynamically instantiates subagents and routes workflows across your local filesystem.
 
 ---
 
-## 1. System Architecture & Design Patterns
+## 1. System Architecture: The Python Pivot
 
-```
-wbw-daemon/
-├── .githooks/            # Shared, version-controlled git validation hooks
-│   └── commit-msg        # Enforces Conventional Commit standards with issue tags
-├── bin/                  # Executable daemon bootstrapper and MCP bridge
-│   ├── mcp-bridge.sh     # Acquires port 8080 lock, starts gcloud proxy, and initializes SSE transport
-│   └── wbw-daemon        # Primary CLI entrypoint; fetches identity and launches agy
-├── rules/                # Fallback rule definitions if dynamic fetching fails
-│   └── base.md           # Local fallback identity rules
-├── install.sh            # Global workspace installer script
-├── mcp_config.json       # Antigravity tool schema pointing to the mcp-bridge.sh
-└── plugin.json           # Antigravity plugin manifest
-```
+Following Initiative 0009, \`wbw-daemon\` abandoned its legacy bash wrapper and monolithic Antigravity CLI dependencies. 
+
+The Orchestrator is now a native Python \`asyncio\` application. This grants programmatic, real-time access to the swarm's internal data streams (thoughts, tool calls, status transitions) for future dashboard broadcasting.
 
 ### Core Design Patterns
-*   **Decentralized Bootstrapping:** Bypasses legacy monolithic `.bashrc` constraints by dynamically symlinking the daemon CLI into `~/.local/bin/wbw-daemon`.
-*   **Stateless Initialization:** `wbw-daemon` does not hardcode Warlock endpoint state. It fetches identity on the fly using strict authenticated `curl` calls against Google Cloud Run APIs.
-*   **Subprocess Proxy Management:** `mcp-bridge.sh` takes strict ownership of the Warlock `gcloud run services proxy`. It uses file-descriptor locking (`flock`) and TCP polling to ensure collision-free tunnel bootstrapping when Antigravity requests MCP tools.
+*   **Decentralized Bootstrapping:** We use \`uv\` for rapid environment scaffolding and dependency management.
+*   **Native MCP Binding:** The daemon natively binds the \`warlock-mcp\` Docker container using the \`google-antigravity\` \`McpStdioServer\`. The daemon manages the Docker lifecycle directly as a subprocess.
+*   **Secure Credential Management:** The daemon relies on a global \`~/.wbw/.env\` vault to store sensitive credentials (like \`GITHUB_API_KEY\`), preventing token exposure in global shell profiles (\`~/.bashrc\`).
 
 ---
 
-## 2. Local Development & Making Changes
+## 2. Installation & Setup
 
-### Editing the Plugin Architecture
-Changes to `mcp_config.json`, `plugin.json`, or the `rules/` directory take effect automatically the next time you boot `wbw-daemon`, provided you are actively working in the workspace where `install.sh` was run.
+We recommend using \`uv\` to run the Daemon natively.
 
-### Editing Executables (`bin/` or `install.sh`)
-If you modify `bin/mcp-bridge.sh`, `bin/wbw-daemon`, or `install.sh`, you should re-run `./install.sh` locally to ensure any dynamically generated absolute paths in `mcp_config.json` remain accurate, and to ensure symlinks in `~/.local/bin` correctly point to your working branch modifications.
+### Step 1: Secure your GitHub Token
+Warlock (the MCP Server) requires a GitHub PAT to fetch your organizational definitions and agent rules dynamically.
+Run the initialization script to configure your local vault:
+\`\`\`bash
+./install.sh
+\`\`\`
+This will prompt you for your \`GITHUB_API_KEY\` and securely write it to \`~/.wbw/.env\`.
 
-### Testing Changes
-1. Apply your changes locally.
-2. Run `./install.sh`.
+### Step 2: Boot the Daemon
+From the repository root, use \`uv\` to build the environment and run the entrypoint:
+\`\`\`bash
+uv run wbw-daemon
+\`\`\`
 
 ---
 
-## 3. Architecture & Financial Case Studies
+## 3. Local Development
 
-- **[Architecture & Cost Optimization Case Study](docs/architecture_cost_case_study.md)**: Detailed analysis of trial-and-error AI costs, 99.8% grounding tool cost reduction, $0.00 GCP Cloud Run free tier tuning, and the Push Package Protocol.
+To actively develop the daemon or its test suite:
 
-3. Boot `wbw-daemon` from a clean terminal to verify Warlock MCP initialization and identity fetching logic.
-4. Execute diagnostic tools to ensure `mcp-bridge.sh` hasn't destabilized the SSE connection.
+1. Install the development dependencies:
+   \`\`\`bash
+   uv pip install -e ".[dev]"
+   \`\`\`
+2. Run the unit tests:
+   \`\`\`bash
+   uv run pytest tests/
+   \`\`\`
