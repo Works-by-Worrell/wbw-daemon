@@ -68,9 +68,7 @@ async def test_interactive_loop_chat(mock_config_cls, mock_agent_cls):
 @pytest.mark.asyncio
 @patch("wbw_daemon.main.Agent")
 @patch("wbw_daemon.main.LocalAgentConfig")
-async def test_interactive_loop_configures_stdio_server(
-    mock_config_cls, mock_agent_cls
-):
+async def test_interactive_loop_configures_daemon(mock_config_cls, mock_agent_cls):
     in_stream = io.StringIO("exit\n")
     out_stream = io.StringIO()
 
@@ -82,6 +80,14 @@ async def test_interactive_loop_configures_stdio_server(
 
     mock_config_cls.assert_called_once()
     kwargs = mock_config_cls.call_args.kwargs
+
+    assert "capabilities" in kwargs
+    capabilities = kwargs["capabilities"]
+    from google.antigravity.types import CapabilitiesConfig
+
+    assert isinstance(capabilities, CapabilitiesConfig)
+    assert capabilities.enable_subagents is True
+
     assert "mcp_servers" in kwargs
     servers = kwargs["mcp_servers"]
     assert len(servers) == 1
