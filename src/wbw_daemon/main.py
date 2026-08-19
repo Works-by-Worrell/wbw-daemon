@@ -3,7 +3,12 @@ import sys
 from pathlib import Path
 
 from google.antigravity import Agent, LocalAgentConfig, policy
-from google.antigravity.types import CapabilitiesConfig, McpStdioServer
+from google.antigravity.types import (
+    AgentBehavior,
+    BuiltinTools,
+    CapabilitiesConfig,
+    McpStdioServer,
+)
 
 
 async def read_line(stream):
@@ -21,9 +26,31 @@ def get_identity_prompt() -> str:
 
 async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
     env_file = str(Path.home() / ".wbw" / ".env")
-    config = LocalAgentConfig(
+
+    api_key = None
+    try:
+        with open(env_file, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("DAEMON_GEMINI_API_KEY="):
+                    val = line.split("=", 1)[1].strip(" \"'")
+                    if val:
+                        api_key = val
+                    break
+    except FileNotFoundError:
+        pass
+
+    if not api_key:
+        print("Error: DAEMON_GEMINI_API_KEY is required in ~/.wbw/.env")
+        sys.exit(1)
+
+    config_kwargs = dict(
         system_instructions=get_identity_prompt(),
-        capabilities=CapabilitiesConfig(enable_subagents=True),
+        capabilities=CapabilitiesConfig(
+            enable_subagents=True,
+            enabled_tools=[BuiltinTools.ASK_QUESTION],
+            agent_behavior=AgentBehavior.INTERACTIVE,
+        ),
         app_data_dir=str(Path.home() / ".gemini" / "antigravity-cli"),
         mcp_servers=[
             McpStdioServer(
@@ -42,7 +69,12 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
             )
         ],
         policies=[policy.allow_all()],
+        model="gemini-3.6-flash",
     )
+    if api_key:
+        config_kwargs["api_key"] = api_key
+
+    config = LocalAgentConfig(**config_kwargs)
 
     async with Agent(config) as agent:
         while True:
