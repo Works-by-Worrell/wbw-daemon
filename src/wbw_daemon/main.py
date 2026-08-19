@@ -69,6 +69,7 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
             )
         ],
         policies=[policy.allow_all()],
+        model="gemini-3.6-flash",
     )
     if api_key:
         config_kwargs["api_key"] = api_key

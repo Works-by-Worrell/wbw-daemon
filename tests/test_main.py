@@ -127,6 +127,9 @@ async def test_interactive_loop_configures_daemon(mock_config_cls, mock_agent_cl
     ]
     assert server.args == expected_args
 
+    assert "model" in kwargs
+    assert kwargs["model"] == "gemini-3.6-flash"
+
 
 @pytest.mark.asyncio
 @patch("wbw_daemon.main.Agent")
