@@ -33,7 +33,7 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
             for line in f:
                 line = line.strip()
                 if line.startswith("DAEMON_GEMINI_API_KEY="):
-                    val = line.split("=", 1)[1].strip()
+                    val = line.split("=", 1)[1].strip(" \"'")
                     if val:
                         api_key = val
                     break
@@ -47,9 +47,9 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
     config_kwargs = dict(
         system_instructions=get_identity_prompt(),
         capabilities=CapabilitiesConfig(
-            enable_subagents=True, 
+            enable_subagents=True,
             enabled_tools=[BuiltinTools.ASK_QUESTION],
-            agent_behavior=AgentBehavior.INTERACTIVE
+            agent_behavior=AgentBehavior.INTERACTIVE,
         ),
         app_data_dir=str(Path.home() / ".gemini" / "antigravity-cli"),
         mcp_servers=[
