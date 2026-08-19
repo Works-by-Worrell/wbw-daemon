@@ -1,11 +1,24 @@
 import io
 from pathlib import Path
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, mock_open, patch
 
 import pytest
 from google.antigravity.types import McpStdioServer
 
 from wbw_daemon.main import interactive_loop
+
+
+@pytest.fixture(autouse=True)
+def _mock_env_for_tests(request):
+    if "without_api_key" in request.node.name:
+        yield
+        return
+    with patch(
+        "builtins.open",
+        new_callable=mock_open,
+        read_data="DAEMON_GEMINI_API_KEY=dummy_key\n",
+    ) as m:
+        yield m
 
 
 @pytest.mark.asyncio
@@ -157,8 +170,8 @@ async def test_interactive_loop_without_api_key(mock_config_cls, mock_agent_cls)
     mock_open_fn = patch("builtins.open", side_effect=FileNotFoundError)
 
     with mock_open_fn:
-        await interactive_loop(in_stream=in_stream, out_stream=out_stream)
+        with pytest.raises(SystemExit) as exc_info:
+            await interactive_loop(in_stream=in_stream, out_stream=out_stream)
+        assert exc_info.value.code == 1
 
-    mock_config_cls.assert_called_once()
-    kwargs = mock_config_cls.call_args.kwargs
-    assert "api_key" not in kwargs
+    mock_config_cls.assert_not_called()

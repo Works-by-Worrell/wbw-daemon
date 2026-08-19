@@ -40,6 +40,10 @@ async def interactive_loop(in_stream=sys.stdin, out_stream=sys.stdout):
     except FileNotFoundError:
         pass
 
+    if not api_key:
+        print("Error: DAEMON_GEMINI_API_KEY is required in ~/.wbw/.env")
+        sys.exit(1)
+
     config_kwargs = dict(
         system_instructions=get_identity_prompt(),
         capabilities=CapabilitiesConfig(
